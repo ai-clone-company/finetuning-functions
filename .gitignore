@@ -1,0 +1,6 @@
+.marvin
+.venv
+.env
+src/my_data.jsonl
+src/__pycache__
+README.md
