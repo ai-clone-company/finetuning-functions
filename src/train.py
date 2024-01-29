@@ -10,6 +10,7 @@ from .common import (
     stub,
 )
 
+# Configure GPUs
 N_GPUS = int(os.environ.get("N_GPUS", 2))
 GPU_MEM = int(os.environ.get("GPU_MEM", 80))
 GPU_CONFIG = modal.gpu.A100(count=N_GPUS, memory=GPU_MEM)

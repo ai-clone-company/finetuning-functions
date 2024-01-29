@@ -13,29 +13,6 @@
   </head>
   <body>
     <section x-data="state()" class="max-w-2xl mx-auto pt-16 px-4">
-      <div class="text-xs font-semibold tracking-wide uppercase text-center text-black">
-        <a
-          href="https://t.me/ferdousbhai"
-          class="inline-flex gap-x-1 items-center bg-lime-400 py-0.5 px-3 rounded-full hover:text-lime-400 hover:ring hover:ring-lime-400 hover:bg-white focus:outline-neutral-400"
-          target="_blank"
-        >
-          Telegram
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-4 h-4 animate-pulse -mr-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-chevrons-right"
-          >
-            <path d="m6 17 5-5-5-5" />
-            <path d="m13 17 5-5-5-5" />
-          </svg>
-        </a>
-      </div>
       <div class="text-4xl mt-4 mb-4 font-semibold tracking-tighter text-center">
         Ask my AI clone anything!
       </div>
@@ -169,7 +146,7 @@
               this.nextPrompt = "";
               this.items.push(item);
 
-              // Wrap the prompt
+              // Wrap the prompt #TODO: Find a better way to do this
               let wrappedPrompt = `<|im_start|>user\n>>>${item.prompt}<|im_end|>\n<|im_start|>Ferdous ฿hai\n`;
               
               const eventSource = new EventSource(
@@ -179,16 +156,17 @@
               console.log("Created event source ...");
 
               const eosToken = '<|im_end|>';
+              let text = ''
 
               eventSource.onmessage = (event) => {
-                text = JSON.parse(event.data).text;
-                // replace '>>>' and add to the completion
-                item.completion += text.replace(/>>>/g, '\n');
-                // If end token is found, close the stream
-                if (item.completion.includes(eosToken)) {
-                  item.completion = item.completion.split(eosToken)[0]
+                text += JSON.parse(event.data).text;
+                // If end token is found in text, close the stream
+                if (text.includes(eosToken)) {
                   eventSource.close(); 
                 }
+                // replace '>>>' from text and extract the completion until the end token
+                item.completion = text.substring(0, text.indexOf(eosToken)).replace(/>>>/g, '\n');
+                // Parse markdown
                 item.markdownCompletion = marked.parse(item.completion, {mangle: false, headerIds: false});
                 // Hacky way to notify element to update
                 this.items = this.items.map((i) =>
