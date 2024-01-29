@@ -9,12 +9,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>My AI Clone | by Ferdous ฿hai</title>
+    <title>Ask My Clone | by Ferdous ฿hai</title>
   </head>
   <body>
     <section x-data="state()" class="max-w-2xl mx-auto pt-16 px-4">
       <div class="text-4xl mt-4 mb-4 font-semibold tracking-tighter text-center">
-        Ask my AI clone anything!
+        Ask my clone
       </div>
       <div x-show="info.loaded && info.model" x-text="info.model" class="text-2xl mb-4 font-medium tracking-tighter text-center">
       </div>
@@ -147,7 +147,7 @@
               this.items.push(item);
 
               // Wrap the prompt #TODO: Find a better way to do this
-              let wrappedPrompt = `<|im_start|>user\n>>>${item.prompt}<|im_end|>\n<|im_start|>Ferdous ฿hai\n`;
+              const wrappedPrompt = `<|im_start|>user\n>>>${item.prompt}<|im_end|>\n<|im_start|>Ferdous ฿hai\n`;
               
               const eventSource = new EventSource(
                 `/completion/${encodeURIComponent(wrappedPrompt)}`,
@@ -160,12 +160,14 @@
 
               eventSource.onmessage = (event) => {
                 text += JSON.parse(event.data).text;
-                // If end token is found in text, close the stream
+                // If end token is found in text, close the stream and remove the token from text
                 if (text.includes(eosToken)) {
-                  eventSource.close(); 
+                  console.log("Closing event source ...");
+                  eventSource.close();
+                  text = text.substring(0, text.indexOf(eosToken));
                 }
-                // replace '>>>' from text and extract the completion until the end token
-                item.completion = text.substring(0, text.indexOf(eosToken)).replace(/>>>/g, '\n');
+                // replace '>>>' from text and set it to completion
+                item.completion = text.replace(/>>>/g, '\n');
                 // Parse markdown
                 item.markdownCompletion = marked.parse(item.completion, {mangle: false, headerIds: false});
                 // Hacky way to notify element to update
